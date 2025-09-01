@@ -8,7 +8,7 @@ export default function AdminPage() {
   const [password, setPassword] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   
-  const CORRECT_PASSWORD = "jagawarga-mvp"; 
+  const CORRECT_PASSWORD = "1234"; 
 
   // Pindahkan EditorMap ke dalam dynamic import
   const EditorMap = useMemo(() => dynamic(

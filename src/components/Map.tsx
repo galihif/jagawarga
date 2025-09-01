@@ -1,14 +1,31 @@
-// file: components/Map.tsx
 'use client';
 
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, GeoJSON } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import type { LatLngExpression } from 'leaflet'; // <-- TAMBAHKAN IMPORT INI
+import type { LatLngExpression } from 'leaflet';
 
-const Map = () => {
-  // Koordinat Jakarta sebagai pusat peta awal
-  // BERI TIPE EKSPLISIT DI SINI V
-  const position: LatLngExpression = [-6.2088, 106.8456]; 
+// Define the structure of a single shape
+export interface Shape {
+  id: string;
+  geojson: any;
+}
+
+// Define the props that this component accepts
+export interface MapProps {
+  shapes: Shape[];
+}
+
+const Map = ({ shapes }: MapProps) => {
+  const position: LatLngExpression = [-6.2088, 106.8456];
+
+  const styleGeoJSON = () => {
+    return {
+      color: '#e60000',
+      weight: 2,
+      fillColor: '#ff3333',
+      fillOpacity: 0.4,
+    };
+  };
 
   return (
     <MapContainer center={position} zoom={13} style={{ height: '100vh', width: '100%' }}>
@@ -16,11 +33,11 @@ const Map = () => {
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <Marker position={position}>
-        <Popup>
-          Jakarta Pusat. <br /> JagaWarga akan tampil di sini.
-        </Popup>
-      </Marker>
+
+      {/* This line loops through the shapes prop and renders each one */}
+      {shapes.map((shape) => (
+        <GeoJSON key={shape.id} data={shape.geojson} style={styleGeoJSON} />
+      ))}
     </MapContainer>
   );
 };
