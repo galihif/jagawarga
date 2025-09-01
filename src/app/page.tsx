@@ -1,8 +1,8 @@
-import MapLoader from '@/src/components/MapLoader'; // Impor komponen baru kita
+import MapLoader from '@/src/components/MapLoader';
 
 export default function Home() {
   return (
-    <main>
+    <main className="h-screen w-full">
       <MapLoader />
     </main>
   );

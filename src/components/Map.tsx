@@ -2,41 +2,35 @@
 
 import { MapContainer, TileLayer, GeoJSON } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import type { LatLngExpression } from 'leaflet';
+import type { MapElement } from '@/src/types/map';
+import { DEFAULT_MAP_CONFIG, MAP_STYLES, TILE_LAYER } from '@/src/config/map';
 
-// Define the structure of a single shape
-export interface Shape {
-  id: string;
-  geojson: any;
-}
-
-// Define the props that this component accepts
 export interface MapProps {
-  shapes: Shape[];
+  mapElements: MapElement[];
 }
 
-const Map = ({ shapes }: MapProps) => {
-  const position: LatLngExpression = [-6.2088, 106.8456];
-
-  const styleGeoJSON = () => {
-    return {
-      color: '#e60000',
-      weight: 2,
-      fillColor: '#ff3333',
-      fillOpacity: 0.4,
-    };
-  };
+const Map = ({ mapElements }: MapProps) => {
+  const getMapElementStyle = () => MAP_STYLES.PUBLIC;
 
   return (
-    <MapContainer center={position} zoom={13} style={{ height: '100vh', width: '100%' }}>
+    <MapContainer 
+      center={DEFAULT_MAP_CONFIG.center} 
+      zoom={DEFAULT_MAP_CONFIG.zoom} 
+      maxZoom={DEFAULT_MAP_CONFIG.maxZoom}
+      minZoom={DEFAULT_MAP_CONFIG.minZoom}
+      style={{ height: '100vh', width: '100%' }}
+    >
       <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        attribution={TILE_LAYER.attribution}
+        url={TILE_LAYER.url}
       />
 
-      {/* This line loops through the shapes prop and renders each one */}
-      {shapes.map((shape) => (
-        <GeoJSON key={shape.id} data={shape.geojson} style={styleGeoJSON} />
+      {mapElements.map((element) => (
+        <GeoJSON 
+          key={element.id} 
+          data={element.geojson} 
+          style={getMapElementStyle} 
+        />
       ))}
     </MapContainer>
   );
