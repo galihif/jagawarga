@@ -11,10 +11,11 @@ import {
   EyeOff,
   Info,
   Settings,
-  MousePointer
+  MousePointer,
+  Move
 } from 'lucide-react';
 
-export type DrawingTool = 'delete' | 'marker' | 'rectangle' | 'circle' | 'polygon';
+export type DrawingTool = 'move' | 'delete' | 'marker' | 'rectangle' | 'circle' | 'polygon';
 
 import { ZONE_TYPES, ZONE_CATEGORIES, getZonesByCategory, getZoneById, type ZoneType } from '@/src/config/zoneTypes';
 import { MARKER_LEGEND, MARKER_CATEGORIES, getMarkersByCategory, getMarkerById, type MarkerLegendItem } from '@/src/config/markerLegend';
@@ -57,6 +58,13 @@ export function AdminToolbar({
   const [activeMarkerCategory, setActiveMarkerCategory] = useState<keyof typeof MARKER_CATEGORIES>('emergency');
 
   const tools = [
+    {
+      id: 'move' as DrawingTool,
+      icon: Move,
+      label: 'Move',
+      description: 'Click and drag elements to move them',
+      color: 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+    },
     {
       id: 'delete' as DrawingTool,
       icon: MousePointer,
