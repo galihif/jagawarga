@@ -85,7 +85,16 @@ const DrawingManager = ({
           break;
         case 'circle':
           if (DrawLib.Circle) {
-            drawHandler = new DrawLib.Circle(map, {});
+            drawHandler = new DrawLib.Circle(map, {
+              shapeOptions: {
+                fillOpacity: 0.2,
+                color: selectedZone ? selectedZone.style.color : '#2563eb',
+                fillColor: selectedZone ? selectedZone.style.fillColor : '#3b82f6',
+                weight: 2
+              },
+              showRadius: true,
+              repeatMode: false
+            });
           }
           break;
         case 'polygon':
@@ -121,6 +130,20 @@ const DrawingManager = ({
         console.log('Draw created event:', e, 'Active tool:', activeTool);
         const layer = e.layer;
         let geoJSON = layer.toGeoJSON();
+
+        // Special handling for circles to preserve radius information
+        if (activeTool === 'circle' && layer instanceof L.Circle) {
+          const center = layer.getLatLng();
+          const radius = layer.getRadius();
+          console.log('Circle created:', { center, radius });
+          
+          // Store circle data in a way that preserves radius
+          geoJSON.properties = {
+            ...geoJSON.properties,
+            circleRadius: radius,
+            circleCenter: [center.lng, center.lat]
+          };
+        }
 
         // Add properties based on tool type
         if (activeTool === 'marker' && selectedMarker) {
@@ -320,6 +343,55 @@ const NewEditorMap = () => {
   // Render map elements with proper styling
   const renderMapElement = (element: any) => {
     console.log('Rendering element:', element.id, element.geojson.geometry.type, element.geojson.properties);
+
+    // Handle circles with preserved radius information
+    if (element.geojson.properties?.circleRadius && element.geojson.properties?.circleCenter) {
+      const [lng, lat] = element.geojson.properties.circleCenter;
+      const radius = element.geojson.properties.circleRadius;
+      const isSelectedForDeletion = selectedElementForDeletion?.id === element.id;
+      const isSelectedForMove = selectedElementForMove?.id === element.id;
+      
+      // Get circle style
+      const getCircleStyle = () => {
+        if (element.geojson.properties?.zoneType) {
+          const zone = getZoneById(element.geojson.properties.zoneType);
+          if (zone) {
+            return {
+              ...zone.style,
+              color: isSelectedForDeletion ? '#dc2626' : isSelectedForMove ? '#2563eb' : zone.style.color,
+              weight: (isSelectedForDeletion || isSelectedForMove) ? 4 : zone.style.weight || 2,
+              fillColor: isSelectedForDeletion ? '#fee2e2' : isSelectedForMove ? '#dbeafe' : zone.style.fillColor,
+            };
+          }
+        }
+        
+        return {
+          fillColor: isSelectedForDeletion ? '#fee2e2' : isSelectedForMove ? '#dbeafe' : '#3b82f6',
+          fillOpacity: 0.2,
+          color: isSelectedForDeletion ? '#dc2626' : isSelectedForMove ? '#2563eb' : '#2563eb',
+          weight: (isSelectedForDeletion || isSelectedForMove) ? 4 : 2
+        };
+      };
+
+      const CircleComponent = () => {
+        const map = useMap();
+        useEffect(() => {
+          const circle = L.circle([lat, lng], radius, getCircleStyle());
+          circle.addTo(map);
+          
+          // Add click handler
+          circle.on('click', () => handleElementClick(element));
+          
+          return () => {
+            circle.remove();
+          };
+        }, [map]);
+        
+        return null;
+      };
+
+      return <CircleComponent key={element.id} />;
+    }
 
     // Handle emoji markers (only for Point geometries with markerType)
     if (element.geojson.geometry.type === 'Point' && element.geojson.properties?.markerType && element.geojson.properties?.emoji) {
