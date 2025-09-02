@@ -212,8 +212,13 @@ const NewEditorMap = () => {
   const handleToolChange = (tool: DrawingTool) => {
     setActiveTool(tool);
     
-    // Clear selections when switching tools
-    if (tool !== 'marker') {
+    // Auto-select default marker for marker tool, clear for non-marker tools
+    if (tool === 'marker') {
+      const fireMarker = getMarkerById('fire');
+      if (fireMarker) {
+        setSelectedMarker(fireMarker);
+      }
+    } else {
       setSelectedMarker(null);
     }
     
