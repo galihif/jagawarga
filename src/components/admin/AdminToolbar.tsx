@@ -7,7 +7,6 @@ import {
   Triangle, 
   MapPin, 
   Trash2, 
-  Save, 
   Eye,
   EyeOff,
   Info,
@@ -24,7 +23,6 @@ interface AdminToolbarProps {
   activeTool: DrawingTool;
   onToolChange: (tool: DrawingTool) => void;
   onClearAll: () => void;
-  onSaveAll: () => void;
   isVisible: boolean;
   onToggleVisibility: () => void;
   // New props for integrated selectors
@@ -43,7 +41,6 @@ export function AdminToolbar({
   activeTool,
   onToolChange,
   onClearAll,
-  onSaveAll,
   isVisible,
   onToggleVisibility,
   selectedZone,
@@ -390,27 +387,17 @@ export function AdminToolbar({
       {/* Quick Actions */}
       <div className="border-t pt-4">
         <h4 className="text-sm font-medium text-gray-700 mb-3">Quick Actions</h4>
-        <div className="flex gap-2">
-          <button
-            onClick={onSaveAll}
-            className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
-          >
-            <Save className="w-4 h-4" />
-            Save All
-          </button>
-          
-          <button
-            onClick={handleClearAll}
-            className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg transition-colors text-sm font-medium ${
-              showConfirmClear 
-                ? 'bg-red-600 text-white hover:bg-red-700' 
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            <Trash2 className="w-4 h-4" />
-            {showConfirmClear ? 'Confirm Clear' : 'Clear All'}
-          </button>
-        </div>
+        <button
+          onClick={handleClearAll}
+          className={`w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg transition-colors text-sm font-medium ${
+            showConfirmClear 
+              ? 'bg-red-600 text-white hover:bg-red-700' 
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          }`}
+        >
+          <Trash2 className="w-4 h-4" />
+          {showConfirmClear ? 'Confirm Clear' : 'Clear All'}
+        </button>
       </div>
     </div>
   );

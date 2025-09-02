@@ -250,9 +250,6 @@ const NewEditorMap = () => {
     }
   };
 
-  const handleSaveAll = () => {
-    alert('All changes are automatically saved in real-time!');
-  };
 
   // Delete functionality
   const handleElementClick = (element: any) => {
@@ -383,7 +380,6 @@ const NewEditorMap = () => {
         activeTool={activeTool}
         onToolChange={handleToolChange}
         onClearAll={handleClearAll}
-        onSaveAll={handleSaveAll}
         isVisible={isElementsVisible}
         onToggleVisibility={() => setIsElementsVisible(!isElementsVisible)}
         selectedZone={selectedZone}
