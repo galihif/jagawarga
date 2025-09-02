@@ -211,7 +211,14 @@ const NewEditorMap = () => {
     if (tool !== 'marker') {
       setSelectedMarker(null);
     }
-    if (tool === 'marker' || tool === 'delete') {
+    
+    // Auto-select Safe Zone for drawing tools, clear for non-drawing tools
+    if (tool === 'rectangle' || tool === 'circle' || tool === 'polygon') {
+      const safeZone = getZoneById('safeZone');
+      if (safeZone) {
+        setSelectedZone(safeZone);
+      }
+    } else {
       setSelectedZone(null);
     }
     
