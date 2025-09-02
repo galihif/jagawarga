@@ -11,10 +11,11 @@ import {
   Eye,
   EyeOff,
   Info,
-  Settings
+  Settings,
+  MousePointer
 } from 'lucide-react';
 
-export type DrawingTool = 'select' | 'marker' | 'rectangle' | 'circle' | 'polygon' | 'delete';
+export type DrawingTool = 'delete' | 'marker' | 'rectangle' | 'circle' | 'polygon';
 
 import { ZONE_TYPES, ZONE_CATEGORIES, getZonesByCategory, getZoneById, type ZoneType } from '@/src/config/zoneTypes';
 import { MARKER_LEGEND, MARKER_CATEGORIES, getMarkersByCategory, getMarkerById, type MarkerLegendItem } from '@/src/config/markerLegend';
@@ -31,6 +32,11 @@ interface AdminToolbarProps {
   onZoneSelect: (zone: ZoneType | null) => void;
   selectedMarker: MarkerLegendItem | null;
   onMarkerSelect: (marker: MarkerLegendItem | null) => void;
+  // Delete confirmation props
+  selectedElementForDeletion: any;
+  showDeleteConfirmation: boolean;
+  onConfirmDelete: () => void;
+  onCancelDelete: () => void;
 }
 
 export function AdminToolbar({
@@ -43,7 +49,11 @@ export function AdminToolbar({
   selectedZone,
   onZoneSelect,
   selectedMarker,
-  onMarkerSelect
+  onMarkerSelect,
+  selectedElementForDeletion,
+  showDeleteConfirmation,
+  onConfirmDelete,
+  onCancelDelete
 }: AdminToolbarProps) {
   const [showConfirmClear, setShowConfirmClear] = useState(false);
   const [activeZoneCategory, setActiveZoneCategory] = useState<keyof typeof ZONE_CATEGORIES>('safety');
@@ -51,11 +61,11 @@ export function AdminToolbar({
 
   const tools = [
     {
-      id: 'select' as DrawingTool,
-      icon: Settings,
-      label: 'Select/Edit',
-      description: 'Select and edit existing elements',
-      color: 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+      id: 'delete' as DrawingTool,
+      icon: MousePointer,
+      label: 'Select to Delete',
+      description: 'Click elements to select and delete them',
+      color: 'bg-red-100 text-red-700 hover:bg-red-200'
     },
     {
       id: 'marker' as DrawingTool,
@@ -320,6 +330,71 @@ export function AdminToolbar({
               <span className="text-sm text-green-600">{selectedMarker.label} - Click on map to place</span>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Delete Confirmation Section */}
+      {showDeleteConfirmation && selectedElementForDeletion && (
+        <div className="border-t pt-4 mb-4">
+          <h4 className="text-sm font-medium text-red-700 mb-3">Confirm Deletion</h4>
+          
+          <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-3">
+            <p className="text-sm text-red-600 mb-3">
+              Are you sure you want to delete this element?
+            </p>
+            
+            {/* Element Preview */}
+            <div className="bg-white p-3 rounded border mb-3">
+              {selectedElementForDeletion.geojson.geometry.type === 'Point' && selectedElementForDeletion.geojson.properties?.markerType ? (
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">{selectedElementForDeletion.geojson.properties.emoji}</span>
+                  <div>
+                    <p className="font-medium text-gray-800 text-sm">
+                      {selectedElementForDeletion.geojson.properties.label || 'Marker'}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {selectedElementForDeletion.geojson.properties.category || 'Unknown'}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <div 
+                    className="w-5 h-5 rounded border-2 flex-shrink-0"
+                    style={{
+                      backgroundColor: selectedElementForDeletion.geojson.properties?.zoneStyle?.fillColor || '#3b82f6',
+                      borderColor: selectedElementForDeletion.geojson.properties?.zoneStyle?.color || '#2563eb',
+                      opacity: 0.7
+                    }}
+                  />
+                  <div>
+                    <p className="font-medium text-gray-800 text-sm">
+                      {selectedElementForDeletion.geojson.properties?.zoneName || 'Zone'}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {selectedElementForDeletion.geojson.geometry.type}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            {/* Confirmation Buttons */}
+            <div className="flex gap-2">
+              <button
+                onClick={onCancelDelete}
+                className="flex-1 px-3 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={onConfirmDelete}
+                className="flex-1 px-3 py-2 text-xs font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

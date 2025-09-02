@@ -31,7 +31,7 @@ import { createEmojiIcon } from '@/src/utils/markerRenderer';
 import { getMarkerById, type MarkerLegendItem } from '@/src/config/markerLegend';
 import { getZoneById, type ZoneType } from '@/src/config/zoneTypes';
 import type { MapElementType } from '@/src/types/map';
-import type { LeafletDrawEvent, LeafletEditEvent, LeafletDeleteEvent } from '@/src/types/leaflet';
+import type { LeafletDrawEvent } from '@/src/types/leaflet';
 
 // Custom drawing manager component
 const DrawingManager = ({ 
@@ -97,6 +97,9 @@ const DrawingManager = ({
           if (selectedMarker && DrawLib.Marker) {
             drawHandler = new DrawLib.Marker(map, {});
           }
+          break;
+        case 'delete':
+          // No draw handler needed for delete tool
           break;
         default:
           break;
@@ -165,14 +168,17 @@ const NewEditorMap = () => {
     createMapElement,
     createError,
     updateMapElement,
-    debouncedBatchDelete
+    debouncedBatchDelete,
+    deleteMapElement
   } = useMapElementMutations();
 
   // UI State
-  const [activeTool, setActiveTool] = useState<DrawingTool>('select');
+  const [activeTool, setActiveTool] = useState<DrawingTool>('delete');
   const [selectedZone, setSelectedZone] = useState<ZoneType | null>(null);
   const [selectedMarker, setSelectedMarker] = useState<MarkerLegendItem | null>(null);
   const [isElementsVisible, setIsElementsVisible] = useState(true);
+  const [selectedElementForDeletion, setSelectedElementForDeletion] = useState<any>(null);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const mapRef = useRef<L.Map | null>(null);
 
   // Statistics
@@ -205,8 +211,14 @@ const NewEditorMap = () => {
     if (tool !== 'marker') {
       setSelectedMarker(null);
     }
-    if (tool === 'marker' || tool === 'select') {
+    if (tool === 'marker' || tool === 'delete') {
       setSelectedZone(null);
+    }
+    
+    // Clear delete selection when switching away from delete tool
+    if (tool !== 'delete') {
+      setSelectedElementForDeletion(null);
+      setShowDeleteConfirmation(false);
     }
   };
 
@@ -235,6 +247,27 @@ const NewEditorMap = () => {
     alert('All changes are automatically saved in real-time!');
   };
 
+  // Delete functionality
+  const handleElementClick = (element: any) => {
+    if (activeTool === 'delete') {
+      setSelectedElementForDeletion(element);
+      setShowDeleteConfirmation(true);
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (selectedElementForDeletion) {
+      await deleteMapElement(selectedElementForDeletion.id);
+      setSelectedElementForDeletion(null);
+      setShowDeleteConfirmation(false);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setSelectedElementForDeletion(null);
+    setShowDeleteConfirmation(false);
+  };
+
   // Render loading and error states
   if (loading) {
     return (
@@ -256,18 +289,9 @@ const NewEditorMap = () => {
   }
 
 
-  // Render map elements with proper styling and edit properties
+  // Render map elements with proper styling
   const renderMapElement = (element: any) => {
     console.log('Rendering element:', element.id, element.geojson.geometry.type, element.geojson.properties);
-    
-    // Add id to properties for editing
-    const elementWithId = {
-      ...element.geojson,
-      properties: {
-        ...element.geojson.properties,
-        id: element.id
-      }
-    };
 
     // Handle emoji markers (only for Point geometries with markerType)
     if (element.geojson.geometry.type === 'Point' && element.geojson.properties?.markerType && element.geojson.properties?.emoji) {
@@ -275,16 +299,20 @@ const NewEditorMap = () => {
       const markerLegend = getMarkerById(element.geojson.properties.markerType);
       
       if (markerLegend) {
+        const isSelected = selectedElementForDeletion?.id === element.id;
         return (
           <Marker
             key={element.id}
             position={[coords[1], coords[0]]}
             icon={createEmojiIcon({
               emoji: markerLegend.emoji,
-              backgroundColor: '#ffffff',
-              borderColor: markerLegend.color,
-              borderWidth: 3
+              backgroundColor: isSelected ? '#fee2e2' : '#ffffff',
+              borderColor: isSelected ? '#dc2626' : markerLegend.color,
+              borderWidth: isSelected ? 4 : 3
             })}
+            eventHandlers={{
+              click: () => handleElementClick(element)
+            }}
           />
         );
       }
@@ -292,19 +320,26 @@ const NewEditorMap = () => {
     
     // Handle all other geometries (polygons, circles, rectangles)
     const getShapeStyle = () => {
+      const isSelected = selectedElementForDeletion?.id === element.id;
+      
       if (element.geojson.properties?.zoneType) {
         const zone = getZoneById(element.geojson.properties.zoneType);
         if (zone) {
           console.log('Using zone style:', zone.style);
-          return zone.style;
+          return {
+            ...zone.style,
+            color: isSelected ? '#dc2626' : zone.style.color,
+            weight: isSelected ? 4 : zone.style.weight || 2,
+            fillColor: isSelected ? '#fee2e2' : zone.style.fillColor,
+          };
         }
       }
       
       const defaultStyle = {
-        fillColor: '#3b82f6',
+        fillColor: isSelected ? '#fee2e2' : '#3b82f6',
         fillOpacity: 0.2,
-        color: '#2563eb',
-        weight: 2
+        color: isSelected ? '#dc2626' : '#2563eb',
+        weight: isSelected ? 4 : 2
       };
       console.log('Using default style:', defaultStyle);
       return defaultStyle;
@@ -313,18 +348,22 @@ const NewEditorMap = () => {
     return (
       <GeoJSON 
         key={element.id} 
-        data={elementWithId} 
+        data={element.geojson} 
         style={getShapeStyle}
         pointToLayer={(feature, latlng) => {
           // For Point geometries that aren't emoji markers, create a circle marker
+          const isSelected = selectedElementForDeletion?.id === element.id;
           return L.circleMarker(latlng, {
             radius: 8,
-            fillColor: '#3b82f6',
-            color: '#2563eb',
-            weight: 2,
+            fillColor: isSelected ? '#fee2e2' : '#3b82f6',
+            color: isSelected ? '#dc2626' : '#2563eb',
+            weight: isSelected ? 4 : 2,
             opacity: 1,
             fillOpacity: 0.2
           });
+        }}
+        eventHandlers={{
+          click: () => handleElementClick(element)
         }}
       />
     );
@@ -344,6 +383,10 @@ const NewEditorMap = () => {
         onZoneSelect={setSelectedZone}
         selectedMarker={selectedMarker}
         onMarkerSelect={setSelectedMarker}
+        selectedElementForDeletion={selectedElementForDeletion}
+        showDeleteConfirmation={showDeleteConfirmation}
+        onConfirmDelete={handleConfirmDelete}
+        onCancelDelete={handleCancelDelete}
       />
 
 
