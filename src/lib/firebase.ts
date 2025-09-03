@@ -1,8 +1,12 @@
 import { initializeApp, type FirebaseApp } from "firebase/app";
-import { getFirestore, type Firestore } from "firebase/firestore";
+import { getFirestore, type Firestore, collection, CollectionReference, DocumentReference } from "firebase/firestore";
+import { getAuth, type Auth } from "firebase/auth";
+import { COLLECTIONS } from '@/src/types/firebase';
+import type { UserDocument, MapElementDocument, InvitationDocument } from '@/src/types/firebase';
 
 let app: FirebaseApp | null = null;
 let database: Firestore | null = null;
+let auth: Auth | null = null;
 
 function getFirebaseConfig() {
   return {
@@ -37,7 +41,29 @@ export function getDatabase(): Firestore {
   return database;
 }
 
+export function getAuthInstance(): Auth {
+  if (!auth) {
+    const firebaseApp = initializeFirebaseApp();
+    auth = getAuth(firebaseApp);
+  }
+  return auth;
+}
+
 // Export the getter function - don't call it at module level
 export const db = getDatabase;
+export const auth = getAuthInstance;
+
+// Collection References with Types
+export function getUsersCollection(): CollectionReference<UserDocument> {
+  return collection(getDatabase(), COLLECTIONS.USERS) as CollectionReference<UserDocument>;
+}
+
+export function getMapElementsCollection(): CollectionReference<MapElementDocument> {
+  return collection(getDatabase(), COLLECTIONS.MAP_ELEMENTS) as CollectionReference<MapElementDocument>;
+}
+
+export function getInvitationsCollection(): CollectionReference<InvitationDocument> {
+  return collection(getDatabase(), COLLECTIONS.INVITATIONS) as CollectionReference<InvitationDocument>;
+}
 
 export default initializeFirebaseApp;

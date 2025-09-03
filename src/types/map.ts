@@ -20,8 +20,11 @@ export interface MapElement {
   id: string;
   type: MapElementType;
   geojson: GeoJSONFeature;
+  province: string; // Province code where this element belongs
   createdAt: Date;
   updatedAt?: Date;
+  createdBy: string; // User ID of creator
+  createdByName?: string; // Display name of creator
 }
 
 export enum MapElementType {
@@ -50,6 +53,7 @@ export interface MapStyle {
 export interface CreateMapElementRequest {
   type: MapElementType;
   geojson: GeoJSONFeature;
+  province: string; // Required province for new elements
 }
 
 export interface UpdateMapElementRequest {
