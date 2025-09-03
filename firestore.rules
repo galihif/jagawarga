@@ -1,0 +1,131 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions for user authentication and authorization
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    
+    function isOwner() {
+      return isAuthenticated() && getUserData().role == "owner";
+    }
+    
+    function isVolunteer() {
+      return isAuthenticated() && getUserData().role == "volunteer";
+    }
+    
+    function isActiveUser() {
+      return isAuthenticated() && getUserData().isActive == true;
+    }
+    
+    function isVolunteerForProvince(province) {
+      return isVolunteer() && getUserData().assignedProvince == province;
+    }
+    
+    function canAccessProvince(province) {
+      return isOwner() || isVolunteerForProvince(province);
+    }
+    
+    function canModifyInProvince(province) {
+      return isActiveUser() && canAccessProvince(province);
+    }
+    
+    // Users collection rules
+    match /users/{userId} {
+      // Users can read their own profile
+      allow read: if isAuthenticated() && request.auth.uid == userId;
+      
+      // Owners can read all users
+      allow read: if isOwner();
+      
+      // Volunteers can read users in their province
+      allow read: if isVolunteer() && 
+        (resource.data.assignedProvince == getUserData().assignedProvince || 
+         resource.data.role == "owner");
+      
+      // Only owners can create users (through invitation system)
+      allow create: if isOwner();
+      
+      // Users can update their own profile (limited fields)
+      allow update: if isAuthenticated() && request.auth.uid == userId &&
+        // Only allow updating specific fields
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['displayName', 'photoURL', 'updatedAt', 'lastLoginAt']);
+      
+      // Owners can update any user
+      allow update: if isOwner();
+      
+      // No deletion allowed (use deactivation instead)
+      allow delete: if false;
+    }
+    
+    // Map elements collection rules
+    match /mapElements/{elementId} {
+      // Anyone can read all map elements (public map)
+      allow read: if true;
+      
+      // Only authenticated active users can create map elements
+      allow create: if isActiveUser() && 
+        // Must include province and createdBy fields
+        request.resource.data.keys().hasAll(['province', 'createdBy']) &&
+        // CreatedBy must match authenticated user
+        request.resource.data.createdBy == request.auth.uid &&
+        // Must be able to modify in that province
+        canModifyInProvince(request.resource.data.province);
+      
+      // Can update if user can modify in that province and is the creator or owner
+      allow update: if isActiveUser() &&
+        canModifyInProvince(resource.data.province) &&
+        (resource.data.createdBy == request.auth.uid || isOwner());
+      
+      // Can delete if user can modify in that province and is the creator or owner
+      allow delete: if isActiveUser() &&
+        canModifyInProvince(resource.data.province) &&
+        (resource.data.createdBy == request.auth.uid || isOwner());
+    }
+    
+    // Invitations collection rules
+    match /invitations/{invitationToken} {
+      // Anyone can read invitations to validate tokens (but limited info exposed)
+      allow read: if true;
+      
+      // Only owners can create invitations
+      allow create: if isOwner() && 
+        request.resource.data.createdBy == request.auth.uid;
+      
+      // Owners can update invitations they created
+      allow update: if isOwner() && resource.data.createdBy == request.auth.uid;
+      
+      // System can update invitations to mark as used (through cloud functions)
+      // Allow updates to mark as used when validating tokens
+      allow update: if isAuthenticated() &&
+        // Only allow updating usage fields
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['isUsed', 'usedBy', 'usedByName', 'usedAt']) &&
+        // Must be marking as used (not unused)
+        request.resource.data.isUsed == true &&
+        // User must not already be registered
+        !exists(/databases/$(database)/documents/users/$(request.auth.uid));
+      
+      // Owners can revoke invitations they created
+      allow update: if isOwner() && resource.data.createdBy == request.auth.uid &&
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['isRevoked', 'revokedBy', 'revokedAt']) &&
+        request.resource.data.isRevoked == true;
+      
+      // No deletion allowed (use revocation instead)
+      allow delete: if false;
+    }
+    
+    // Default deny rule for any other collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
