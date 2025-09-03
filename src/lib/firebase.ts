@@ -6,7 +6,7 @@ import type { UserDocument, MapElementDocument, InvitationDocument } from '@/src
 
 let app: FirebaseApp | null = null;
 let database: Firestore | null = null;
-let auth: Auth | null = null;
+let authInstance: Auth | null = null;
 
 function getFirebaseConfig() {
   return {
@@ -42,11 +42,11 @@ export function getDatabase(): Firestore {
 }
 
 export function getAuthInstance(): Auth {
-  if (!auth) {
+  if (!authInstance) {
     const firebaseApp = initializeFirebaseApp();
-    auth = getAuth(firebaseApp);
+    authInstance = getAuth(firebaseApp);
   }
-  return auth;
+  return authInstance;
 }
 
 // Export the getter function - don't call it at module level
