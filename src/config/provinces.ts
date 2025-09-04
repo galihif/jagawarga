@@ -1,306 +1,349 @@
-export interface Province {
-  code: string;
-  name: string;
-  fullName: string;
-  region: 'SUMATRA' | 'JAWA' | 'KALIMANTAN' | 'SULAWESI' | 'MALUKU_PAPUA' | 'NUSA_TENGGARA';
-  capital: string;
-}
+/**
+ * Indonesian Provinces Configuration
+ * Complete list of Indonesian provinces with codes and regional grouping
+ * Used for multi-admin system with province-based access control
+ */
 
-export const PROVINCES: Record<string, Province> = {
-  ACEH: {
+import type { Province, ProvinceSelectOption } from '@/src/types/province';
+import { IndonesianRegion } from '@/src/types/province';
+
+export const INDONESIAN_PROVINCES: Province[] = [
+  // SUMATRA
+  {
     code: 'ACEH',
     name: 'Aceh',
-    fullName: 'Nanggroe Aceh Darussalam',
-    region: 'SUMATRA',
-    capital: 'Banda Aceh'
+    region: IndonesianRegion.SUMATRA,
+    capital: 'Banda Aceh',
+    isActive: true
   },
-  SUMUT: {
+  {
     code: 'SUMUT',
     name: 'Sumatera Utara',
-    fullName: 'Sumatera Utara',
-    region: 'SUMATRA',
-    capital: 'Medan'
+    region: IndonesianRegion.SUMATRA,
+    capital: 'Medan',
+    isActive: true
   },
-  SUMBAR: {
+  {
     code: 'SUMBAR',
     name: 'Sumatera Barat',
-    fullName: 'Sumatera Barat',
-    region: 'SUMATRA',
-    capital: 'Padang'
+    region: IndonesianRegion.SUMATRA,
+    capital: 'Padang',
+    isActive: true
   },
-  RIAU: {
+  {
     code: 'RIAU',
     name: 'Riau',
-    fullName: 'Riau',
-    region: 'SUMATRA',
-    capital: 'Pekanbaru'
+    region: IndonesianRegion.SUMATRA,
+    capital: 'Pekanbaru',
+    isActive: true
   },
-  KEPRI: {
+  {
     code: 'KEPRI',
     name: 'Kepulauan Riau',
-    fullName: 'Kepulauan Riau',
-    region: 'SUMATRA',
-    capital: 'Tanjung Pinang'
+    region: IndonesianRegion.SUMATRA,
+    capital: 'Tanjung Pinang',
+    isActive: true
   },
-  JAMBI: {
+  {
     code: 'JAMBI',
     name: 'Jambi',
-    fullName: 'Jambi',
-    region: 'SUMATRA',
-    capital: 'Jambi'
+    region: IndonesianRegion.SUMATRA,
+    capital: 'Jambi',
+    isActive: true
   },
-  SUMSEL: {
+  {
     code: 'SUMSEL',
     name: 'Sumatera Selatan',
-    fullName: 'Sumatera Selatan',
-    region: 'SUMATRA',
-    capital: 'Palembang'
+    region: IndonesianRegion.SUMATRA,
+    capital: 'Palembang',
+    isActive: true
   },
-  BABEL: {
+  {
     code: 'BABEL',
     name: 'Bangka Belitung',
-    fullName: 'Kepulauan Bangka Belitung',
-    region: 'SUMATRA',
-    capital: 'Pangkal Pinang'
+    region: IndonesianRegion.SUMATRA,
+    capital: 'Pangkal Pinang',
+    isActive: true
   },
-  BENGKULU: {
+  {
     code: 'BENGKULU',
     name: 'Bengkulu',
-    fullName: 'Bengkulu',
-    region: 'SUMATRA',
-    capital: 'Bengkulu'
+    region: IndonesianRegion.SUMATRA,
+    capital: 'Bengkulu',
+    isActive: true
   },
-  LAMPUNG: {
+  {
     code: 'LAMPUNG',
     name: 'Lampung',
-    fullName: 'Lampung',
-    region: 'SUMATRA',
-    capital: 'Bandar Lampung'
+    region: IndonesianRegion.SUMATRA,
+    capital: 'Bandar Lampung',
+    isActive: true
   },
-  DKI: {
+
+  // JAVA
+  {
     code: 'DKI',
     name: 'DKI Jakarta',
-    fullName: 'Daerah Khusus Ibukota Jakarta',
-    region: 'JAWA',
-    capital: 'Jakarta'
+    region: IndonesianRegion.JAVA,
+    capital: 'Jakarta',
+    isActive: true
   },
-  JABAR: {
+  {
     code: 'JABAR',
     name: 'Jawa Barat',
-    fullName: 'Jawa Barat',
-    region: 'JAWA',
-    capital: 'Bandung'
+    region: IndonesianRegion.JAVA,
+    capital: 'Bandung',
+    isActive: true
   },
-  JATENG: {
-    code: 'JATENG',
-    name: 'Jawa Tengah',
-    fullName: 'Jawa Tengah',
-    region: 'JAWA',
-    capital: 'Semarang'
-  },
-  DIY: {
-    code: 'DIY',
-    name: 'DI Yogyakarta',
-    fullName: 'Daerah Istimewa Yogyakarta',
-    region: 'JAWA',
-    capital: 'Yogyakarta'
-  },
-  JATIM: {
-    code: 'JATIM',
-    name: 'Jawa Timur',
-    fullName: 'Jawa Timur',
-    region: 'JAWA',
-    capital: 'Surabaya'
-  },
-  BANTEN: {
+  {
     code: 'BANTEN',
     name: 'Banten',
-    fullName: 'Banten',
-    region: 'JAWA',
-    capital: 'Serang'
+    region: IndonesianRegion.JAVA,
+    capital: 'Serang',
+    isActive: true
   },
-  BALI: {
-    code: 'BALI',
-    name: 'Bali',
-    fullName: 'Bali',
-    region: 'NUSA_TENGGARA',
-    capital: 'Denpasar'
+  {
+    code: 'JATENG',
+    name: 'Jawa Tengah',
+    region: IndonesianRegion.JAVA,
+    capital: 'Semarang',
+    isActive: true
   },
-  NTB: {
-    code: 'NTB',
-    name: 'Nusa Tenggara Barat',
-    fullName: 'Nusa Tenggara Barat',
-    region: 'NUSA_TENGGARA',
-    capital: 'Mataram'
+  {
+    code: 'DIY',
+    name: 'DI Yogyakarta',
+    region: IndonesianRegion.JAVA,
+    capital: 'Yogyakarta',
+    isActive: true
   },
-  NTT: {
-    code: 'NTT',
-    name: 'Nusa Tenggara Timur',
-    fullName: 'Nusa Tenggara Timur',
-    region: 'NUSA_TENGGARA',
-    capital: 'Kupang'
+  {
+    code: 'JATIM',
+    name: 'Jawa Timur',
+    region: IndonesianRegion.JAVA,
+    capital: 'Surabaya',
+    isActive: true
   },
-  KALBAR: {
+
+  // KALIMANTAN
+  {
     code: 'KALBAR',
     name: 'Kalimantan Barat',
-    fullName: 'Kalimantan Barat',
-    region: 'KALIMANTAN',
-    capital: 'Pontianak'
+    region: IndonesianRegion.KALIMANTAN,
+    capital: 'Pontianak',
+    isActive: true
   },
-  KALTENG: {
+  {
     code: 'KALTENG',
     name: 'Kalimantan Tengah',
-    fullName: 'Kalimantan Tengah',
-    region: 'KALIMANTAN',
-    capital: 'Palangka Raya'
+    region: IndonesianRegion.KALIMANTAN,
+    capital: 'Palangka Raya',
+    isActive: true
   },
-  KALSEL: {
+  {
     code: 'KALSEL',
     name: 'Kalimantan Selatan',
-    fullName: 'Kalimantan Selatan',
-    region: 'KALIMANTAN',
-    capital: 'Banjarmasin'
+    region: IndonesianRegion.KALIMANTAN,
+    capital: 'Banjarmasin',
+    isActive: true
   },
-  KALTIM: {
+  {
     code: 'KALTIM',
     name: 'Kalimantan Timur',
-    fullName: 'Kalimantan Timur',
-    region: 'KALIMANTAN',
-    capital: 'Samarinda'
+    region: IndonesianRegion.KALIMANTAN,
+    capital: 'Samarinda',
+    isActive: true
   },
-  KALTARA: {
-    code: 'KALTARA',
+  {
+    code: 'KALUT',
     name: 'Kalimantan Utara',
-    fullName: 'Kalimantan Utara',
-    region: 'KALIMANTAN',
-    capital: 'Tanjung Selor'
+    region: IndonesianRegion.KALIMANTAN,
+    capital: 'Tanjung Selor',
+    isActive: true
   },
-  SULUT: {
+
+  // SULAWESI
+  {
     code: 'SULUT',
     name: 'Sulawesi Utara',
-    fullName: 'Sulawesi Utara',
-    region: 'SULAWESI',
-    capital: 'Manado'
+    region: IndonesianRegion.SULAWESI,
+    capital: 'Manado',
+    isActive: true
   },
-  SULTENG: {
-    code: 'SULTENG',
-    name: 'Sulawesi Tengah',
-    fullName: 'Sulawesi Tengah',
-    region: 'SULAWESI',
-    capital: 'Palu'
-  },
-  SULSEL: {
-    code: 'SULSEL',
-    name: 'Sulawesi Selatan',
-    fullName: 'Sulawesi Selatan',
-    region: 'SULAWESI',
-    capital: 'Makassar'
-  },
-  SULTRA: {
-    code: 'SULTRA',
-    name: 'Sulawesi Tenggara',
-    fullName: 'Sulawesi Tenggara',
-    region: 'SULAWESI',
-    capital: 'Kendari'
-  },
-  GORONTALO: {
+  {
     code: 'GORONTALO',
     name: 'Gorontalo',
-    fullName: 'Gorontalo',
-    region: 'SULAWESI',
-    capital: 'Gorontalo'
+    region: IndonesianRegion.SULAWESI,
+    capital: 'Gorontalo',
+    isActive: true
   },
-  SULBAR: {
+  {
+    code: 'SULTENG',
+    name: 'Sulawesi Tengah',
+    region: IndonesianRegion.SULAWESI,
+    capital: 'Palu',
+    isActive: true
+  },
+  {
     code: 'SULBAR',
     name: 'Sulawesi Barat',
-    fullName: 'Sulawesi Barat',
-    region: 'SULAWESI',
-    capital: 'Mamuju'
+    region: IndonesianRegion.SULAWESI,
+    capital: 'Mamuju',
+    isActive: true
   },
-  MALUKU: {
+  {
+    code: 'SULSEL',
+    name: 'Sulawesi Selatan',
+    region: IndonesianRegion.SULAWESI,
+    capital: 'Makassar',
+    isActive: true
+  },
+  {
+    code: 'SULTRA',
+    name: 'Sulawesi Tenggara',
+    region: IndonesianRegion.SULAWESI,
+    capital: 'Kendari',
+    isActive: true
+  },
+
+  // BALI & NUSA TENGGARA
+  {
+    code: 'BALI',
+    name: 'Bali',
+    region: IndonesianRegion.BALI_NUSA_TENGGARA,
+    capital: 'Denpasar',
+    isActive: true
+  },
+  {
+    code: 'NTB',
+    name: 'Nusa Tenggara Barat',
+    region: IndonesianRegion.BALI_NUSA_TENGGARA,
+    capital: 'Mataram',
+    isActive: true
+  },
+  {
+    code: 'NTT',
+    name: 'Nusa Tenggara Timur',
+    region: IndonesianRegion.BALI_NUSA_TENGGARA,
+    capital: 'Kupang',
+    isActive: true
+  },
+
+  // MALUKU
+  {
     code: 'MALUKU',
     name: 'Maluku',
-    fullName: 'Maluku',
-    region: 'MALUKU_PAPUA',
-    capital: 'Ambon'
+    region: IndonesianRegion.MALUKU,
+    capital: 'Ambon',
+    isActive: true
   },
-  MALUT: {
+  {
     code: 'MALUT',
     name: 'Maluku Utara',
-    fullName: 'Maluku Utara',
-    region: 'MALUKU_PAPUA',
-    capital: 'Ternate'
+    region: IndonesianRegion.MALUKU,
+    capital: 'Ternate',
+    isActive: true
   },
-  PAPUA: {
+
+  // PAPUA
+  {
     code: 'PAPUA',
     name: 'Papua',
-    fullName: 'Papua',
-    region: 'MALUKU_PAPUA',
-    capital: 'Jayapura'
+    region: IndonesianRegion.PAPUA,
+    capital: 'Jayapura',
+    isActive: true
   },
-  PAPBAR: {
+  {
     code: 'PAPBAR',
     name: 'Papua Barat',
-    fullName: 'Papua Barat',
-    region: 'MALUKU_PAPUA',
-    capital: 'Manokwari'
+    region: IndonesianRegion.PAPUA,
+    capital: 'Manokwari',
+    isActive: true
   },
-  PAPSEL: {
+  {
     code: 'PAPSEL',
     name: 'Papua Selatan',
-    fullName: 'Papua Selatan',
-    region: 'MALUKU_PAPUA',
-    capital: 'Merauke'
+    region: IndonesianRegion.PAPUA,
+    capital: 'Merauke',
+    isActive: true
   },
-  PAPTENG: {
+  {
     code: 'PAPTENG',
     name: 'Papua Tengah',
-    fullName: 'Papua Tengah',
-    region: 'MALUKU_PAPUA',
-    capital: 'Nabire'
+    region: IndonesianRegion.PAPUA,
+    capital: 'Nabire',
+    isActive: true
   },
-  PAPPEG: {
-    code: 'PAPPEG',
+  {
+    code: 'PAPEG',
     name: 'Papua Pegunungan',
-    fullName: 'Papua Pegunungan',
-    region: 'MALUKU_PAPUA',
-    capital: 'Wamena'
+    region: IndonesianRegion.PAPUA,
+    capital: 'Jayawijaya',
+    isActive: true
   },
-  PAPBARDAYA: {
+  {
     code: 'PAPBARDAYA',
     name: 'Papua Barat Daya',
-    fullName: 'Papua Barat Daya',
-    region: 'MALUKU_PAPUA',
-    capital: 'Sorong'
+    region: IndonesianRegion.PAPUA,
+    capital: 'Sorong',
+    isActive: true
   }
-};
-
-export const REGIONS = {
-  SUMATRA: { name: 'Sumatra', color: '#ef4444' },
-  JAWA: { name: 'Jawa', color: '#3b82f6' },
-  KALIMANTAN: { name: 'Kalimantan', color: '#22c55e' },
-  SULAWESI: { name: 'Sulawesi', color: '#f59e0b' },
-  NUSA_TENGGARA: { name: 'Nusa Tenggara', color: '#8b5cf6' },
-  MALUKU_PAPUA: { name: 'Maluku & Papua', color: '#ec4899' }
-};
+];
 
 // Helper functions
-export const getProvinceByCode = (code: string): Province | null => {
-  return PROVINCES[code] || null;
-};
+export function getProvinceByCode(code: string): Province | undefined {
+  return INDONESIAN_PROVINCES.find(province => province.code === code);
+}
 
-export const getProvincesByRegion = (region: string): Province[] => {
-  return Object.values(PROVINCES).filter(province => province.region === region);
-};
+export function getProvincesByRegion(region: IndonesianRegion): Province[] {
+  return INDONESIAN_PROVINCES.filter(province => province.region === region);
+}
 
-export const getAllProvinces = (): Province[] => {
-  return Object.values(PROVINCES);
-};
+export function getActiveProvinces(): Province[] {
+  return INDONESIAN_PROVINCES.filter(province => province.isActive);
+}
 
-export const generateProvinceOptions = () => {
-  return Object.values(PROVINCES).map(province => ({
-    value: province.code,
-    label: province.name,
-    region: province.region
-  })).sort((a, b) => a.label.localeCompare(b.label, 'id'));
-};
+export function getProvinceSelectOptions(): ProvinceSelectOption[] {
+  return INDONESIAN_PROVINCES
+    .filter(province => province.isActive)
+    .map(province => ({
+      value: province.code,
+      label: `${province.name} (${province.code})`,
+      region: province.region,
+      disabled: false
+    }))
+    .sort((a, b) => a.label.localeCompare(b.label));
+}
+
+export function getRegionSelectOptions(): { value: IndonesianRegion; label: string }[] {
+  return Object.values(IndonesianRegion).map(region => ({
+    value: region,
+    label: region
+  }));
+}
+
+// Commonly used province codes for quick access
+export const PROVINCE_CODES = {
+  // Java (most populated)
+  JAKARTA: 'DKI',
+  WEST_JAVA: 'JABAR',
+  CENTRAL_JAVA: 'JATENG',
+  EAST_JAVA: 'JATIM',
+  YOGYAKARTA: 'DIY',
+  BANTEN: 'BANTEN',
+  
+  // Sumatra
+  NORTH_SUMATRA: 'SUMUT',
+  WEST_SUMATRA: 'SUMBAR',
+  SOUTH_SUMATRA: 'SUMSEL',
+  ACEH: 'ACEH',
+  RIAU: 'RIAU',
+  JAMBI: 'JAMBI',
+  BENGKULU: 'BENGKULU',
+  LAMPUNG: 'LAMPUNG',
+  
+  // Others
+  BALI: 'BALI',
+  EAST_KALIMANTAN: 'KALTIM',
+  SOUTH_SULAWESI: 'SULSEL',
+  PAPUA: 'PAPUA'
+} as const;
