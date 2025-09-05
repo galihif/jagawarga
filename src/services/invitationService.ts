@@ -119,7 +119,7 @@ export class InvitationService {
   }
 
   // Validate and use invitation
-  async validateAndUseInvitation(token: string, userId: string): Promise<InvitationValidationResponse> {
+  async validateAndUseInvitation(token: string, userId: string, userEmail?: string, displayName?: string): Promise<InvitationValidationResponse> {
     try {
       // First validate the token format
       const tokenParts = parseInvitationToken(token);
@@ -138,11 +138,11 @@ export class InvitationService {
 
       const invitation = validation.invitation!;
 
-      // Check if user already exists and has access to this province
-      const user = await this.userService.getUserById(userId);
-      if (user) {
+      // Check if user already exists in our database
+      const existingUser = await this.userService.getUserById(userId);
+      if (existingUser) {
         // User exists - check if they can access this province
-        if (user.role === 'owner' || user.assignedProvince === invitation.province) {
+        if (existingUser.role === 'owner' || existingUser.assignedProvince === invitation.province) {
           return {
             isValid: false,
             error: 'You already have access to this province'
@@ -156,10 +156,28 @@ export class InvitationService {
         };
       }
 
-      // At this point user is null (doesn't exist), so we'll use the userId
-      const userName = 'New User';
+      // User doesn't exist in our database, create them as a volunteer
+      if (userEmail) {
+        const createUserResult = await this.userService.createUser({
+          id: userId,
+          email: userEmail,
+          displayName: displayName || 'Volunteer',
+          role: 'volunteer',
+          assignedProvince: invitation.province,
+          isActive: true,
+          createdBy: invitation.createdBy,
+        });
+
+        if (!createUserResult.success) {
+          return {
+            isValid: false,
+            error: createUserResult.error || 'Failed to create user account'
+          };
+        }
+      }
 
       // Mark invitation as used
+      const userName = displayName || userEmail || 'New User';
       const marked = await this.repository.markInvitationAsUsed(token, userId, userName);
       if (!marked) {
         return {
