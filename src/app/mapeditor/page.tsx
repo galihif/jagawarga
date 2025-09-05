@@ -1,9 +1,22 @@
 'use client';
 
 import { useAuth } from '@/src/hooks/useAuth';
-import NewEditorMap from '@/src/components/NewEditorMap';
 import { QuickAuth } from '@/src/components/auth/QuickAuth';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
+
+// Dynamically import the map component to prevent SSR issues with Leaflet
+const NewEditorMap = dynamic(() => import('@/src/components/NewEditorMap'), {
+  ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center h-full">
+      <div className="text-center">
+        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
+        <p className="text-gray-600">Loading Map Editor...</p>
+      </div>
+    </div>
+  )
+});
 
 export default function MapEditorPage() {
   const { user, loading } = useAuth();
