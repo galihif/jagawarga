@@ -7,6 +7,7 @@ import {
   getDocs, 
   getDoc, 
   query, 
+  where,
   orderBy, 
   writeBatch,
   onSnapshot,
@@ -29,6 +30,8 @@ export interface MapElementRepositoryInterface extends Repository<
 > {
   subscribeToAll(callback: (elements: MapElement[]) => void): Unsubscribe;
   batchDelete(ids: string[]): Promise<void>;
+  getByProvinces(provinces: string[]): Promise<MapElement[]>;
+  subscribeToProvinces(provinces: string[], callback: (elements: MapElement[]) => void): Unsubscribe;
 }
 
 export class MapElementRepository implements MapElementRepositoryInterface {
@@ -70,6 +73,9 @@ export class MapElementRepository implements MapElementRepositoryInterface {
       const docData = {
         type: request.type,
         geojson: JSON.stringify(request.geojson),
+        province: request.province || '',
+        createdBy: request.createdBy || '',
+        createdByName: request.createdByName,
         createdAt: now,
         updatedAt: now,
       };
@@ -81,6 +87,9 @@ export class MapElementRepository implements MapElementRepositoryInterface {
         id: docRef.id,
         type: request.type,
         geojson: request.geojson,
+        province: request.province || '',
+        createdBy: request.createdBy || '',
+        createdByName: request.createdByName,
         createdAt: now,
         updatedAt: now,
       };
@@ -163,6 +172,49 @@ export class MapElementRepository implements MapElementRepositoryInterface {
     });
   }
 
+  async getByProvinces(provinces: string[]): Promise<MapElement[]> {
+    try {
+      if (provinces.length === 0) return [];
+      
+      const collectionRef = this.getCollectionRef();
+      const q = query(
+        collectionRef, 
+        where("province", "in", provinces),
+        orderBy("createdAt", "asc")
+      );
+      const querySnapshot = await getDocs(q);
+      
+      return querySnapshot.docs.map(doc => this.mapDocumentToEntity(doc));
+    } catch (error) {
+      throw new Error(`Failed to fetch map elements for provinces: ${error}`);
+    }
+  }
+
+  subscribeToProvinces(provinces: string[], callback: (elements: MapElement[]) => void): Unsubscribe {
+    if (provinces.length === 0) {
+      callback([]);
+      return () => {};
+    }
+
+    const collectionRef = this.getCollectionRef();
+    const q = query(
+      collectionRef,
+      where("province", "in", provinces),
+      orderBy("createdAt", "asc")
+    );
+    
+    return onSnapshot(q, (querySnapshot) => {
+      try {
+        const elements = querySnapshot.docs.map(doc => this.mapDocumentToEntity(doc));
+        callback(elements);
+      } catch (error) {
+        console.error('Error processing real-time update:', error);
+      }
+    }, (error) => {
+      console.error('Error in real-time subscription:', error);
+    });
+  }
+
   private mapDocumentToEntity(doc: { id: string; data: () => any }): MapElement {
     const data = doc.data();
     const geojson = JSON.parse(data.geojson);
@@ -177,8 +229,11 @@ export class MapElementRepository implements MapElementRepositoryInterface {
       id: doc.id,
       type: data.type,
       geojson,
+      province: data.province || '', // Province field
       createdAt: data.createdAt?.toDate() || new Date(),
       updatedAt: data.updatedAt?.toDate(),
+      createdBy: data.createdBy || '',
+      createdByName: data.createdByName,
     };
   }
 }

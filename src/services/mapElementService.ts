@@ -9,12 +9,14 @@ import { mapElementRepository, type MapElementRepositoryInterface } from "@/src/
 
 export interface MapElementServiceInterface {
   getAllMapElements(): Promise<ApiResponse<MapElement[]>>;
+  getMapElementsByProvinces(provinces: string[]): Promise<ApiResponse<MapElement[]>>;
   getMapElement(id: string): Promise<ApiResponse<MapElement>>;
   createMapElement(request: CreateMapElementRequest): Promise<ApiResponse<MapElement>>;
   updateMapElement(request: UpdateMapElementRequest): Promise<ApiResponse<MapElement>>;
   deleteMapElement(id: string): Promise<ApiResponse<void>>;
   batchDeleteMapElements(request: BatchDeleteMapElementsRequest): Promise<ApiResponse<void>>;
   subscribeToMapElements(callback: (elements: MapElement[]) => void): () => void;
+  subscribeToMapElementsByProvinces(provinces: string[], callback: (elements: MapElement[]) => void): () => void;
 }
 
 export class MapElementService implements MapElementServiceInterface {
@@ -169,8 +171,37 @@ export class MapElementService implements MapElementServiceInterface {
     }
   }
 
+  async getMapElementsByProvinces(provinces: string[]): Promise<ApiResponse<MapElement[]>> {
+    try {
+      if (!provinces || provinces.length === 0) {
+        return {
+          data: [],
+          loading: false,
+          error: undefined
+        };
+      }
+
+      const data = await this.repository.getByProvinces(provinces);
+      return {
+        data,
+        loading: false,
+        error: undefined
+      };
+    } catch (error) {
+      return {
+        data: undefined,
+        loading: false,
+        error: this.extractErrorMessage(error)
+      };
+    }
+  }
+
   subscribeToMapElements(callback: (elements: MapElement[]) => void): () => void {
     return this.repository.subscribeToAll(callback);
+  }
+
+  subscribeToMapElementsByProvinces(provinces: string[], callback: (elements: MapElement[]) => void): () => void {
+    return this.repository.subscribeToProvinces(provinces, callback);
   }
 
   private validateCreateRequest(request: CreateMapElementRequest): string | null {

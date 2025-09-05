@@ -124,12 +124,18 @@
 
 ## Phase 4: Admin Interface Updates
 
-### ❌ Task 9: Province Filtering
-**Status: NOT STARTED**
-- ❌ Update map element queries with province filters
-- ❌ Volunteer sees only their province
-- ❌ Owner can select/view multiple provinces
-- ❌ Province indicator in UI
+### ✅ Task 9: Province Filtering
+**Status: COMPLETED**
+- ✅ Update map element queries with province filters
+- ✅ Volunteer sees only their province
+- ✅ Owner can select/view multiple provinces
+- ✅ Province indicator in UI
+
+**Files Modified:**
+- ✅ `src/repositories/mapElementRepository.ts` - Added province filtering methods
+- ✅ `src/services/mapElementService.ts` - Added province-based service methods
+- ✅ `src/hooks/useRealtimeMapElements.ts` - Enhanced with authentication-based filtering
+- ✅ `src/components/admin/ProvinceFilter.tsx` - Created province selector for owners
 
 ---
 
@@ -169,7 +175,7 @@
 1. ✅ Firebase schema updates
 2. ✅ Basic authentication (Task 4)
 3. ✅ Invitation token system
-4. ❌ Province filtering (Task 9)
+4. ✅ Province filtering (Task 9)
 5. ✅ Invitation page (Task 8)
 
 ### Medium Priority:
