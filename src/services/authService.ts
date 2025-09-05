@@ -142,30 +142,51 @@ export class AuthService {
       const userCredential = await signInWithPopup(this.auth, this.googleProvider);
       const firebaseUser = userCredential.user;
 
-      // Check if user exists in our database
+      // Check if user exists in our database by Firebase UID
       let user = await this.userService.getUserById(firebaseUser.uid);
 
       if (!user) {
-        // Check if user exists by email
-        user = await this.userService.getUserByEmail(firebaseUser.email!);
-        
-        if (!user) {
-          // Sign out if user not found
-          await this.signOut();
-          return {
-            success: false,
-            error: 'You need an invitation to register. Please contact administrator.',
-          };
-        }
+        // Special case: Auto-create owner for id.giftech@gmail.com
+        if (firebaseUser.email === 'id.giftech@gmail.com') {
+          const createResult = await this.userService.createUser({
+            email: firebaseUser.email,
+            displayName: firebaseUser.displayName || 'Owner',
+            photoURL: firebaseUser.photoURL || undefined,
+            role: 'owner',
+            assignedProvince: undefined,
+          }, firebaseUser.uid);
 
-        // Link the existing user record with the Firebase Auth user
-        const updateResult = await this.userService.updateUser(user.id, {
-          displayName: firebaseUser.displayName || user.displayName,
-          photoURL: firebaseUser.photoURL || undefined,
-        });
+          if (createResult.success) {
+            user = createResult.user!;
+          } else {
+            await this.signOut();
+            return {
+              success: false,
+              error: 'Failed to create owner account. Please contact administrator.',
+            };
+          }
+        } else {
+          // Check if user exists by email (bootstrap scenario)
+          user = await this.userService.getUserByEmail(firebaseUser.email!);
+          
+          if (!user) {
+            // Sign out if user not found
+            await this.signOut();
+            return {
+              success: false,
+              error: 'You need an invitation to register. Please contact administrator.',
+            };
+          }
 
-        if (updateResult.success) {
-          user = updateResult.user!;
+          // Update the existing user record with Firebase UID
+          const updateResult = await this.userService.updateUser(user.id, {
+            displayName: firebaseUser.displayName || user.displayName,
+            photoURL: firebaseUser.photoURL || user.photoURL,
+          });
+
+          if (updateResult.success) {
+            user = updateResult.user!;
+          }
         }
       } else {
         // Update user info from Google

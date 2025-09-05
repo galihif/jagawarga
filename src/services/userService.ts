@@ -217,6 +217,16 @@ export class UserService {
     }
   }
 
+  // Delete user (used for migration scenarios)
+  async deleteUser(userId: string): Promise<boolean> {
+    try {
+      return await this.repository.deleteUser(userId);
+    } catch (error) {
+      console.error('UserService.deleteUser error:', error);
+      return false;
+    }
+  }
+
   // Get users with filters
   async getUsers(filters?: {
     role?: UserRole;
