@@ -60,8 +60,16 @@ export class MapElementServiceWithAuth implements MapElementServiceWithAuthInter
 
   // Enhanced create method with authentication context
   async createMapElement(request: AuthenticatedCreateMapElementRequest, user: User | null): Promise<ApiResponse<MapElement>> {
+    console.log('MapElementServiceWithAuth.createMapElement called', { 
+      requestType: request.type, 
+      requestProvince: request.province,
+      userRole: user?.role,
+      userProvince: user?.assignedProvince 
+    });
+
     // Validate user authentication
     if (!user) {
+      console.error('Authentication required - no user provided');
       return {
         data: undefined,
         loading: false,
@@ -91,11 +99,9 @@ export class MapElementServiceWithAuth implements MapElementServiceWithAuthInter
         }
         province = user.assignedProvince;
       } else if (user.role === 'owner') {
-        return {
-          data: undefined,
-          loading: false,
-          error: 'Province must be specified for owner accounts'
-        };
+        // Owners can create elements without specifying a province (global access)
+        // We'll set province to null to indicate it's a global/cross-province element
+        province = null;
       } else {
         return {
           data: undefined,
@@ -121,11 +127,26 @@ export class MapElementServiceWithAuth implements MapElementServiceWithAuthInter
       geojson: request.geojson,
       province,
       createdBy: user.id,
-      createdByName: user.displayName || user.email || 'Unknown User'
     };
 
+    // Only add createdByName if we have a valid name
+    const displayName = user.displayName || user.email;
+    if (displayName) {
+      enhancedRequest.createdByName = displayName;
+    }
+
+    console.log('Calling base service with enhanced request:', enhancedRequest);
+
     // Delegate to base service
-    return this.baseService.createMapElement(enhancedRequest);
+    const result = await this.baseService.createMapElement(enhancedRequest);
+    
+    console.log('Base service result:', { 
+      success: !!result.data, 
+      error: result.error,
+      elementId: result.data?.id 
+    });
+    
+    return result;
   }
 
   // Convenience method that always auto-detects province
@@ -134,9 +155,9 @@ export class MapElementServiceWithAuth implements MapElementServiceWithAuthInter
   }
 
   // Validate if user can create in the specified province
-  private validateProvinceAccess(user: User, province: string): { allowed: boolean; error?: string } {
+  private validateProvinceAccess(user: User, province: string | null): { allowed: boolean; error?: string } {
     if (user.role === 'owner') {
-      // Owners can create in any province
+      // Owners can create in any province (including global elements with null province)
       return { allowed: true };
     }
 

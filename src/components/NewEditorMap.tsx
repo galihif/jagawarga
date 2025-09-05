@@ -16,6 +16,7 @@ L.Icon.Default.mergeOptions({
 });
 
 // Hooks and Services
+import { useAuth } from '@/src/hooks/useAuth';
 import { useRealtimeMapElements } from '@/src/hooks/useRealtimeMapElements';
 import { useMapElementMutations } from '@/src/hooks/useMapElementMutations';
 
@@ -24,6 +25,7 @@ import { LoadingSpinner } from '@/src/components/ui/LoadingSpinner';
 import { ErrorMessage } from '@/src/components/ui/ErrorMessage';
 import { AdminToolbar, type DrawingTool } from '@/src/components/admin/AdminToolbar';
 import { ShapeInfoPanel } from '@/src/components/admin/ShapeInfoPanel';
+import { ProvinceSelector } from '@/src/components/ui/ProvinceSelector';
 
 // Configuration and Types
 import { DEFAULT_MAP_CONFIG, TILE_LAYER } from '@/src/config/map';
@@ -103,7 +105,7 @@ const DrawingManager = ({
           }
           break;
         case 'marker':
-          if (selectedMarker && DrawLib.Marker) {
+          if (DrawLib.Marker) {
             drawHandler = new DrawLib.Marker(map, {});
           }
           break;
@@ -189,6 +191,7 @@ const DrawingManager = ({
 };
 
 const NewEditorMap = () => {
+  const { user } = useAuth();
   const { data: mapElements, loading, error } = useRealtimeMapElements();
   const {
     createMapElement,
@@ -270,7 +273,14 @@ const NewEditorMap = () => {
 
   // Custom drawing handler
   const handleCustomElementCreate = async (elementData: any) => {
-    const result = await createMapElement(elementData);
+    // For owners, they can create elements without specifying a province (global access)
+    // For volunteers, use their assigned province
+    const elementWithProvince = {
+      ...elementData,
+      province: user?.role === 'volunteer' ? user?.assignedProvince : undefined
+    };
+
+    const result = await createMapElement(elementWithProvince);
 
     if (result) {
       console.log('Element created successfully');
@@ -476,6 +486,7 @@ const NewEditorMap = () => {
 
   return (
     <div className="relative h-screen w-full bg-gray-100">
+
       {/* Unified Admin Toolbar */}
       <AdminToolbar
         activeTool={activeTool}

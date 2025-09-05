@@ -5,11 +5,13 @@ import type {
   MapElement 
 } from '@/src/types/map';
 import { mapElementService, type MapElementServiceInterface } from '@/src/services/mapElementService';
+import { mapElementServiceWithAuth, type AuthenticatedCreateMapElementRequest } from '@/src/services/mapElementServiceWithAuth';
+import { useAuth } from '@/src/hooks/useAuth';
 import { DEBOUNCE_DELAYS } from '@/src/config/map';
 
 export interface UseMapElementMutationsReturn {
-  // Create
-  createMapElement: (request: CreateMapElementRequest) => Promise<MapElement | null>;
+  // Create (now uses authentication)
+  createMapElement: (request: AuthenticatedCreateMapElementRequest) => Promise<MapElement | null>;
   createLoading: boolean;
   createError: string | null;
 
@@ -35,6 +37,7 @@ export interface UseMapElementMutationsReturn {
 export function useMapElementMutations(
   service: MapElementServiceInterface = mapElementService
 ): UseMapElementMutationsReturn {
+  const { user } = useAuth();
   // Create state
   const [createLoading, setCreateLoading] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
@@ -56,13 +59,13 @@ export function useMapElementMutations(
   const pendingDeletesRef = useRef<string[]>([]);
 
   const createMapElement = useCallback(async (
-    request: CreateMapElementRequest
+    request: AuthenticatedCreateMapElementRequest
   ): Promise<MapElement | null> => {
     setCreateLoading(true);
     setCreateError(null);
 
     try {
-      const response = await service.createMapElement(request);
+      const response = await mapElementServiceWithAuth.createMapElement(request, user);
       
       if (response.error) {
         setCreateError(response.error);
@@ -77,7 +80,7 @@ export function useMapElementMutations(
     } finally {
       setCreateLoading(false);
     }
-  }, [service]);
+  }, [user]);
 
   const updateMapElement = useCallback(async (
     request: UpdateMapElementRequest
