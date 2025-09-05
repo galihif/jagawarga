@@ -53,7 +53,9 @@ export interface MapStyle {
 export interface CreateMapElementRequest {
   type: MapElementType;
   geojson: GeoJSONFeature;
-  province: string; // Required province for new elements
+  province?: string; // Optional - will be auto-detected from user if not provided
+  createdBy?: string; // Optional - will be auto-set from authenticated user
+  createdByName?: string; // Optional - will be auto-set from authenticated user
 }
 
 export interface UpdateMapElementRequest {

@@ -139,12 +139,20 @@
 
 ---
 
-### ❌ Task 10: Map Element Creation Updates
-**Status: NOT STARTED**
-- ❌ Auto-add province to new elements
-- ❌ Add creator information
-- ❌ Update all CRUD operations
-- ❌ Maintain existing functionality
+### ✅ Task 10: Map Element Creation Updates
+**Status: COMPLETED**
+- ✅ Auto-add province to new elements
+- ✅ Add creator information
+- ✅ Update all CRUD operations
+- ✅ Maintain existing functionality
+
+**Files Created:**
+- ✅ `src/services/mapElementServiceWithAuth.ts` - Authentication-aware map element service
+- ✅ `src/hooks/useMapElementActions.ts` - React hooks for authenticated map operations
+
+**Files Modified:**
+- ✅ `src/types/map.ts` - Updated CreateMapElementRequest with optional auth fields
+- ✅ `src/hooks/useAuth.tsx` - Fixed JSX parsing by renaming to .tsx extension
 
 ---
 

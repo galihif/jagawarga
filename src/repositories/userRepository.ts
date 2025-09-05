@@ -4,6 +4,7 @@ import {
   getDoc,
   getDocs,
   addDoc,
+  setDoc,
   updateDoc,
   deleteDoc,
   query,
@@ -35,8 +36,8 @@ export class UserRepository {
       displayName: data.displayName,
       photoURL: data.photoURL,
       role: data.role,
-      assignedProvince: data.assignedProvince,
-      isActive: data.isActive,
+      assignedProvince: data.province,
+      isActive: data.status === 'active',
       createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : data.createdAt,
       updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt.toDate() : data.updatedAt,
       lastLoginAt: data.lastLoginAt instanceof Timestamp ? data.lastLoginAt.toDate() : data.lastLoginAt,
@@ -47,25 +48,37 @@ export class UserRepository {
   async createUser(userData: CreateUserData, userId?: string): Promise<User | null> {
     try {
       const now = serverTimestamp();
-      const docData: Omit<UserDocument, 'id'> = {
+      
+      // Build document data, excluding undefined fields
+      const docData: any = {
         email: userData.email,
-        displayName: userData.displayName,
-        photoURL: userData.photoURL,
         role: userData.role,
-        assignedProvince: userData.assignedProvince,
-        isActive: true,
-        createdAt: now as Timestamp,
-        updatedAt: now as Timestamp,
+        status: 'active',
+        createdAt: now,
+        updatedAt: now,
+        lastLoginAt: null,
+        emailVerified: false,
       };
+
+      // Only add optional fields if they're not undefined
+      if (userData.displayName !== undefined) {
+        docData.displayName = userData.displayName;
+      }
+      if (userData.photoURL !== undefined) {
+        docData.photoURL = userData.photoURL;
+      }
+      if (userData.assignedProvince !== undefined) {
+        docData.province = userData.assignedProvince;
+      }
 
       let docRef;
       if (userId) {
         // Create user with specific ID (for Auth UID)
         docRef = doc(this.collection, userId);
-        await updateDoc(docRef, docData as any);
+        await setDoc(docRef, docData);
       } else {
         // Create user with auto-generated ID
-        docRef = await addDoc(this.collection, docData as any);
+        docRef = await addDoc(this.collection, docData);
       }
 
       // Return the created user
@@ -164,6 +177,18 @@ export class UserRepository {
       return true;
     } catch (error) {
       console.error('Error activating user:', error);
+      return false;
+    }
+  }
+
+  // Hard delete user (used for migration scenarios)
+  async deleteUser(userId: string): Promise<boolean> {
+    try {
+      const docRef = doc(this.collection, userId);
+      await deleteDoc(docRef);
+      return true;
+    } catch (error) {
+      console.error('Error deleting user:', error);
       return false;
     }
   }

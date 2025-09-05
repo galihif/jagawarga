@@ -70,29 +70,39 @@ export class MapElementRepository implements MapElementRepositoryInterface {
   async create(request: CreateMapElementRequest): Promise<MapElement> {
     try {
       const now = new Date();
-      const docData = {
+      const docData: any = {
         type: request.type,
         geojson: JSON.stringify(request.geojson),
         province: request.province || '',
         createdBy: request.createdBy || '',
-        createdByName: request.createdByName,
         createdAt: now,
         updatedAt: now,
       };
 
+      // Only add createdByName if it's not undefined
+      if (request.createdByName !== undefined) {
+        docData.createdByName = request.createdByName;
+      }
+
       const collectionRef = this.getCollectionRef();
       const docRef = await addDoc(collectionRef, docData);
       
-      return {
+      const result: MapElement = {
         id: docRef.id,
         type: request.type,
         geojson: request.geojson,
         province: request.province || '',
         createdBy: request.createdBy || '',
-        createdByName: request.createdByName,
         createdAt: now,
         updatedAt: now,
       };
+
+      // Only add createdByName if it was provided
+      if (request.createdByName !== undefined) {
+        result.createdByName = request.createdByName;
+      }
+
+      return result;
     } catch (error) {
       throw new Error(`Failed to create map element: ${error}`);
     }

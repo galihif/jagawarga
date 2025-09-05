@@ -10,7 +10,9 @@
       "Read(/C:\\Users\\galih\\Documents\\GALIH\\Software Engineering\\Web Development\\jagawarga\\src\\types/**)",
       "Read(/C:\\Users\\galih\\Documents\\GALIH\\Software Engineering\\Web Development\\jagawarga\\src\\repositories/**)",
       "Read(/C:\\Users\\galih\\Documents\\GALIH\\Software Engineering\\Web Development\\jagawarga\\src\\services/**)",
-      "Read(/C:\\Users\\galih\\Documents\\GALIH\\Software Engineering\\Web Development\\jagawarga\\src\\hooks/**)"
+      "Read(/C:\\Users\\galih\\Documents\\GALIH\\Software Engineering\\Web Development\\jagawarga\\src\\hooks/**)",
+      "Read(/C:\\Users\\galih\\Documents\\GALIH\\Software Engineering\\Web Development\\jagawarga\\src\\types/**)",
+      "Read(/C:\\Users\\galih\\Documents\\GALIH\\Software Engineering\\Web Development\\jagawarga\\src\\types/**)"
     ],
     "deny": [],
     "ask": []
